@@ -28,6 +28,7 @@ app.get('/scrape', function(req, res) {
       res.send('Scraped');
     });
   });
+
 app.get('/articles', function(req, res) {
     db.Article.find({})
       .then(function(dbArticle) {
@@ -37,6 +38,7 @@ app.get('/articles', function(req, res) {
         res.json(err);
       });
   });
+
 app.get('/articles/:id', function(req, res) {
   db.Article.findOne({ _id: req.params.id})
     .populate('Note')
@@ -48,5 +50,27 @@ app.get('/articles/:id', function(req, res) {
     });
 });
 
+app.post('/articles/:id', function(req, res){
+  db.Note.create(req.body)
+  .then(function(dbNote){
+    return db.Article.findOneAndUpdate({}, {$push: {_id: req.params.id}}, {note: dbNote._id}, {new: true});
+  })
+  .then(function(dbArticle) {
+    res.json(dbArticle);
+  })
+  .catch(function(err){
+    res.json(err);
+  });
+});
+
+app.get('/notes/:id', function(req, res){
+  db.Note.find({_id: req.parms.id})
+  .then(function(dbNote) {
+    res.json(dbNote);
+  })
+  .catch(function(err){
+    res.json(err);
+  });
+});
 
 }
